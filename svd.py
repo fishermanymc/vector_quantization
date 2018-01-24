@@ -52,7 +52,7 @@ def getRatio(pid=0, numIter=300, maxPara=1000, thres=0.05):
     X = np.transpose(np.matrix(x))
 
     # extract the training set
-    XTrain = X[:, :150]
+    XTrain = X[:, 0:150]
 
     # perform PCA
     Xc, meanCol = centerilze(XTrain)
@@ -126,7 +126,7 @@ for pid in [0, 2, 4, 6, 8]:
     varloss = [20, 15, 10, 5, 1]
     for var in varloss:
         print("when var loss is ", var, "%:")
-        rr, ll = getRatio(thres=(var / 100))
+        rr, ll = getRatio(pid=pid, thres=(var / 100))
         r.append(rr)
         loss.append(ll)
     loss = [l * 100 for l in loss]
