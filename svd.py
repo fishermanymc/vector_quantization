@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
 
 def centerilze(X):
@@ -46,7 +47,9 @@ def getRatio(pid=0, numIter=300, maxPara=1000, thres=0.05):
     x = []
     pidName = '_pid0' + str(pid) + '.bin'  # hard coded file name
     for i in range(1, numIter + 1):
-        fileName = 'phase1/iter' + '0' * (6 - len(str(i))) + str(i) + pidName
+        fileName = 'phase1/iter000' + '0' * (3 - len(str(i))) + str(i) + pidName
+        # fileName = 'phase3/iter025' + '0' * (3 - len(str(i))) + str(i) + pidName
+        # fileName = 'phase3/iter049' + '0' * (3 - len(str(i))) + str(i) + pidName
         temp = np.fromfile(fileName, dtype=np.float32)
         x.append(temp[:maxPara])
     X = np.transpose(np.matrix(x))
@@ -72,11 +75,12 @@ def getRatio(pid=0, numIter=300, maxPara=1000, thres=0.05):
     XTest = X[:, 150:300]
 
     # compress then recover the training set, then analyse the loss
+    # _, meanCol = centerilze(XTest)
     XTestC = compress(XTest, meanCol, U, d)
     XTestD = decompress(XTestC, meanCol, U, d)
     print("training set recovery loss (normalized square error) is: ",
           offset(XTest, XTestD))
-    return ratio, offset(XTest, XTestD)
+    return ratio, offset(XTest, XTestD), U
 
 
 def compress(X, meanCol, U, d):
@@ -119,6 +123,7 @@ def doubleplot(x, y1, y2):
     plt.show()
 
 
+Ustored = {}
 for pid in [0, 2, 4, 6, 8]:
     print("\ncurrently working on pid=", pid)
     r = []
@@ -126,9 +131,12 @@ for pid in [0, 2, 4, 6, 8]:
     varloss = [20, 15, 10, 5, 1]
     for var in varloss:
         print("when var loss is ", var, "%:")
-        rr, ll = getRatio(pid=pid, thres=(var / 100))
+        rr, ll, U = getRatio(pid=pid, thres=(var / 100))
         r.append(rr)
         loss.append(ll)
+    Ustored[pid] = U
     loss = [l * 100 for l in loss]
     doubleplot(varloss, r, loss)
     print("\n")
+# with open("U_phase3.pickle", 'wb') as handle:
+#     pickle.dump(Ustored, handle)
